@@ -20,6 +20,7 @@ export default function WatchPartyPanel() {
   const selfIdRef = useRef<string>('');
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const suppressRef = useRef<boolean>(false);
+  const createdRoomRef = useRef<boolean>(false);
 
   useEffect(() => {
     selfIdRef.current = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -60,11 +61,13 @@ export default function WatchPartyPanel() {
       setRoom((prev) => {
         if (prev && prev.length > 0) return prev;
         const generated = generateRoomId();
+        createdRoomRef.current = true;
         return generated;
       });
     }
     disconnect();
     const targetRoom = room || generateRoomId();
+    if (!room) createdRoomRef.current = true;
     const es = new EventSource(`/api/watchparty/events?room=${encodeURIComponent(targetRoom)}`);
     es.onmessage = (ev) => {
       try {
@@ -116,8 +119,17 @@ export default function WatchPartyPanel() {
     esRef.current = es;
     setConnected(true);
     // 广播加入
-    emit('presence', { action: 'join', name });
+    emit('presence', { action: 'join', name, isHost: createdRoomRef.current });
     ensureVideoListeners();
+
+    // 如果是房间创建者，连接后立即上报一次当前播放状态，供后续加入者初始对齐
+    if (createdRoomRef.current) {
+      const v = getVideo();
+      if (v) {
+        const state = v.paused ? 'pause' : 'play';
+        emit('playback', { state, time: v.currentTime });
+      }
+    }
   };
 
   const disconnect = () => {
@@ -166,6 +178,7 @@ export default function WatchPartyPanel() {
   const createRoom = () => {
     const id = generateRoomId();
     setRoom(id);
+    createdRoomRef.current = true;
   };
 
   const copyInvite = async () => {

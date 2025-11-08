@@ -13,6 +13,7 @@ type RoomState = {
   clients: Set<Client>;
   hostId?: string;
   lastPlayback?: { state: 'play' | 'pause' | 'seek'; time: number };
+  members: Map<string, string>; // sender -> name
 };
 
 declare global {
@@ -42,7 +43,7 @@ export async function POST(req: NextRequest) {
       ts: Date.now()
     };
     const channel = getChannel();
-    if (!channel.rooms.has(room)) channel.rooms.set(room, { clients: new Set<Client>() });
+    if (!channel.rooms.has(room)) channel.rooms.set(room, { clients: new Set<Client>(), members: new Map<string, string>() });
     const state = channel.rooms.get(room)!;
 
     // 主机选择：第一次有人加入即视为主机，或由 presence.isHost 指定
@@ -51,6 +52,9 @@ export async function POST(req: NextRequest) {
       if (!state.hostId || isHost) {
         state.hostId = event.sender;
       }
+      // 记录成员名称
+      const name = typeof event.payload?.name === 'string' ? event.payload?.name : undefined;
+      if (name) state.members.set(event.sender, name);
     }
 
     // 仅记录主机的最后播放状态，供后续新加入者一次性对齐
@@ -75,3 +79,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: String(e) }, { status: 500 });
   }
 }
+    if (event.type === 'presence' && event.payload?.action === 'leave') {
+      state.members.delete(event.sender);
+    }

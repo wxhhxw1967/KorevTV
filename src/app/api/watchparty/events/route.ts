@@ -13,6 +13,7 @@ type RoomState = {
   clients: Set<Client>;
   hostId?: string;
   lastPlayback?: { state: 'play' | 'pause' | 'seek'; time: number };
+  members: Map<string, string>; // sender -> name
 };
 
 declare global {
@@ -48,12 +49,16 @@ export async function GET(request: NextRequest) {
 
       const client: Client = { room, enqueue, close };
       const channel = getChannel();
-      if (!channel.rooms.has(room)) channel.rooms.set(room, { clients: new Set<Client>() });
+      if (!channel.rooms.has(room)) channel.rooms.set(room, { clients: new Set<Client>(), members: new Map<string, string>() });
       const state = channel.rooms.get(room)!;
       state.clients.add(client);
 
       // 初始欢迎与心跳
       enqueue({ type: 'joined', room });
+      // 当前成员快照
+      try {
+        enqueue({ type: 'members', payload: { members: Array.from(state.members.values()) } });
+      } catch {}
       // 如果房间存在主机的最后播放状态，新加入时立即推送，便于一次性对齐进度
       if (state.lastPlayback) {
         enqueue({ type: 'playback', payload: state.lastPlayback, sender: state.hostId, ts: Date.now(), initial: true });
