@@ -29,6 +29,7 @@ import { SearchResult } from '@/lib/types';
 import { getVideoResolutionFromM3u8, processImageUrl } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 const WatchPartyPanel = dynamic(() => import('@/components/WatchPartyPanel'), { ssr: false });
+import LiquidGlassContainer from '@/components/LiquidGlassContainer';
 
 // 扩展 HTMLVideoElement 类型以支持 hls 属性
 declare global {
