@@ -1068,10 +1068,12 @@ function HomeClient() {
             <div className='flex items-center gap-2 text-xs text-gray-600 dark:text-gray-300'>
               <span>个性化推荐</span>
               <CapsuleSwitch
-                checked={personalRecommendEnabled}
-                onChange={(v: boolean) => {
-                  setPersonalRecommendEnabled(v);
-                  try { localStorage.setItem('personalRecommendEnabled', String(v)); } catch {}
+                options={[{ label: '开', value: 'on' }, { label: '关', value: 'off' }]}
+                active={personalRecommendEnabled ? 'on' : 'off'}
+                onChange={(val: string) => {
+                  const enabled = val === 'on';
+                  setPersonalRecommendEnabled(enabled);
+                  try { localStorage.setItem('personalRecommendEnabled', String(enabled)); } catch {}
                 }}
               />
             </div>

@@ -22,7 +22,9 @@ const CapsuleSwitch: React.FC<CapsuleSwitchProps> = ({
     width: number;
   }>({ left: 0, width: 0 });
 
-  const activeIndex = options.findIndex((opt) => opt.value === active);
+  // 兼容无传入 options 的情况，避免运行时异常
+  const safeOptions = Array.isArray(options) ? options : [];
+  const activeIndex = safeOptions.findIndex((opt) => opt.value === active);
 
   // 更新指示器位置
   const updateIndicatorPosition = () => {
@@ -78,7 +80,7 @@ const CapsuleSwitch: React.FC<CapsuleSwitchProps> = ({
         />
       )}
 
-      {options.map((opt, index) => {
+      {safeOptions.map((opt, index) => {
         const isActive = active === opt.value;
         return (
           <button
