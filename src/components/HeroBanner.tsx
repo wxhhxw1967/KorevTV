@@ -16,6 +16,9 @@ interface BannerItem {
   rate?: string;
   douban_id?: number;
   type?: string;
+  region?: string;
+  tags?: string[];
+  creators?: string[];
 }
 
 interface HeroBannerProps {
@@ -305,7 +308,21 @@ export default function HeroBanner({
                    currentItem.type === 'anime' ? '番剧' : '剧集'}
                 </span>
               )}
+              {currentItem.region && (
+                <span className='px-2 py-0.5 bg-white/20 rounded'>地区 {currentItem.region}</span>
+              )}
             </div>
+            {/* 主创 / 标签 */}
+            {(currentItem.creators?.length || currentItem.tags?.length) ? (
+              <div className='flex flex-wrap items-center gap-2 text-xs'>
+                {currentItem.creators && currentItem.creators.slice(0, 6).map((c, i) => (
+                  <span key={`cr-${i}`} className='px-2 py-1 bg-white/15 text-white/90 rounded-full'>主创：{c}</span>
+                ))}
+                {currentItem.tags && currentItem.tags.slice(0, 8).map((t, i) => (
+                  <span key={`tag-${i}`} className='px-2 py-1 bg-white/10 text-white/80 rounded-full'>{t}</span>
+                ))}
+              </div>
+            ) : null}
             <div className='text-sm text-white/80 whitespace-pre-line max-h-64 overflow-y-auto'>
               {currentItem.description || '暂无更详细的简介'}
             </div>
@@ -320,6 +337,13 @@ export default function HeroBanner({
                 onClick={() => setShowMore(false)}
               >
                 跳转列表
+              </Link>
+              <Link
+                href={`/search?q=${encodeURIComponent(currentItem.title)}`}
+                className='text-xs px-3 py-1 rounded-full bg-pink-600 text-white hover:bg-pink-700'
+                onClick={() => setShowMore(false)}
+              >
+                相关推荐
               </Link>
             </div>
           </LiquidGlassContainer>
