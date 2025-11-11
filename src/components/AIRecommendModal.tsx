@@ -38,6 +38,21 @@ export default function AIRecommendModal({ isOpen, onClose }: AIRecommendModalPr
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
 
+  // 预设分类图标映射（用于欢迎页按钮展示）
+  const iconForTitle = (title: string) => {
+    const t = title.toLowerCase();
+    if (t.includes('热门')) return '🔥';
+    if (t.includes('电视剧') || t.includes('剧')) return '📺';
+    if (t.includes('喜剧')) return '😂';
+    if (t.includes('动作')) return '💥';
+    if (t.includes('爱情')) return '❤️';
+    if (t.includes('悬疑') || t.includes('推理')) return '🕵️';
+    if (t.includes('经典')) return '⭐';
+    if (t.includes('综艺') || t.includes('节目')) return '🎤';
+    if (t.includes('动漫') || t.includes('动画')) return '🎞️';
+    return '✨';
+  };
+
   // 滚动到底部
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -246,7 +261,7 @@ export default function AIRecommendModal({ isOpen, onClose }: AIRecommendModalPr
       {/* 对话框 */}
       <div className="relative w-full max-w-4xl h-[80vh] mx-4 bg-white dark:bg-gray-900 rounded-lg shadow-2xl flex flex-col overflow-hidden">
         {/* 头部 */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-blue-600 to-purple-600">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-indigo-600 to-violet-600">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-white bg-opacity-20 rounded-lg">
               <Brain className="h-6 w-6 text-white" />
@@ -280,9 +295,9 @@ export default function AIRecommendModal({ isOpen, onClose }: AIRecommendModalPr
           className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-800"
         >
           {messages.length <= 1 && messages.every(msg => msg.role === 'assistant' && msg.content.includes('AI智能助手')) && (
-            <div className="text-center py-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-4">
-                <Sparkles className="h-8 w-8 text-white" />
+            <div className="text-center py-10">
+              <div className="inline-flex items-center justify-center w-18 h-18 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full mb-5 shadow">
+                <Sparkles className="h-9 w-9 text-white" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
                 欢迎使用AI智能助手
@@ -290,21 +305,36 @@ export default function AIRecommendModal({ isOpen, onClose }: AIRecommendModalPr
               <p className="text-gray-600 dark:text-gray-400 mb-6">
                 支持影视推荐、YouTube链接解析和视频搜索推荐
               </p>
-              
-              {/* 预设问题 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl mx-auto">
-                {AI_RECOMMEND_PRESETS.map((preset, index) => (
+
+              {/* 分类预设（更贴近图片的九宫格按钮） */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-3xl mx-auto">
+                {AI_RECOMMEND_PRESETS.slice(0, 8).map((preset, index) => (
                   <button
                     key={index}
                     onClick={() => handlePresetClick(preset)}
-                    className="p-3 text-left bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-md transition-all group"
+                    className="px-4 py-3 text-left bg-white dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-md transition-all group flex items-center gap-2"
                     disabled={isLoading}
                   >
-                    <div className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                    <span className="text-lg leading-none">{iconForTitle(preset.title)}</span>
+                    <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                       {preset.title}
-                    </div>
+                    </span>
                   </button>
                 ))}
+              </div>
+
+              {/* 功能说明卡片 */}
+              <div className="mt-6 max-w-3xl mx-auto">
+                <div className="rounded-lg border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/20 p-4 text-left">
+                  <div className="text-sm text-indigo-700 dark:text-indigo-300">
+                    <div>你好！我是AI智能助手，支持以下功能：</div>
+                    <ul className="mt-2 space-y-1 list-disc list-inside">
+                      <li>影视推荐：推荐电影、电视剧、动漫等</li>
+                      <li>视频链接解析：支持解析并播放YouTube链接</li>
+                      <li>视频搜索推荐：根据关键词推荐相关视频内容</li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
           )}

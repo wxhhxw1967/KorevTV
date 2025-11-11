@@ -20,6 +20,7 @@ import {
 } from '@/lib/db.client';
 import { getDoubanCategories, getDoubanDetails } from '@/lib/douban.client';
 import { getRecommendedShortDramas } from '@/lib/shortdrama.client';
+import { AI_RECOMMEND_PRESETS } from '@/lib/ai-recommend.client';
 import { cleanExpiredCache } from '@/lib/shortdrama-cache';
 import { ReleaseCalendarItem,ShortDramaItem } from '@/lib/types';
 import { DoubanItem } from '@/lib/types';
@@ -91,6 +92,21 @@ function HomeClient() {
     }
     return true;
   });
+
+  // 首页分类快捷入口图标映射
+  const iconForTitle = useCallback((title: string) => {
+    const t = title.toLowerCase();
+    if (t.includes('热门')) return '🔥';
+    if (t.includes('电视剧') || t.includes('剧')) return '📺';
+    if (t.includes('喜剧')) return '😂';
+    if (t.includes('动作')) return '💥';
+    if (t.includes('爱情')) return '❤️';
+    if (t.includes('悬疑') || t.includes('推理')) return '🕵️';
+    if (t.includes('经典')) return '⭐';
+    if (t.includes('综艺') || t.includes('节目')) return '🎤';
+    if (t.includes('动漫') || t.includes('动画')) return '🎞️';
+    return '✨';
+  }, []);
 
   // 合并初始化逻辑 - 优化性能，减少重渲染
   useEffect(() => {
@@ -1171,6 +1187,19 @@ function HomeClient() {
             <div className='text-xs text-gray-600 dark:text-gray-300'>
               根据你的“继续观看”和“收藏”偏好，获取个性化推荐。
             </div>
+            {/* 分类快捷入口宫格 */}
+            <div className='mt-3 grid grid-cols-2 md:grid-cols-4 gap-2 max-w-3xl'>
+              {AI_RECOMMEND_PRESETS.slice(0, 8).map((preset, index) => (
+                <button
+                  key={index}
+                  onClick={() => setShowAIRecommendModal(true)}
+                  className='flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-indigo-500 dark:hover:border-indigo-400 hover:shadow-md transition-all'
+                >
+                  <span className='text-base leading-none'>{iconForTitle(preset.title)}</span>
+                  <span className='text-sm font-medium text-gray-900 dark:text-gray-100'>{preset.title}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* 最近热播 */}
@@ -1181,7 +1210,7 @@ function HomeClient() {
                 <div className='text-xs text-gray-500 dark:text-gray-400'>数据来源：AI推荐服务（热门趋势）</div>
                 <button
                   onClick={() => setShowAIRecommendModal(true)}
-                  className='text-xs px-3 py-1 rounded-full bg-indigo-600 text白 hover:bg-indigo-700'
+                  className='text-xs px-3 py-1 rounded-full bg-indigo-600 text-white hover:bg-indigo-700'
                 >
                   查看热门
                 </button>
@@ -1209,6 +1238,17 @@ function HomeClient() {
           </div>
         </div>
       )}
+      {/* 悬浮 AI 助手按钮 */}
+      <div className='fixed right-4 bottom-20 md:bottom-6 z-40'>
+        <button
+          onClick={() => setShowAIRecommendModal(true)}
+          className='flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:from-purple-500 hover:to-indigo-500 active:scale-95 transition-all'
+          aria-label='打开AI助手'
+        >
+          <Brain className='w-5 h-5' />
+          <span className='hidden sm:inline text-sm font-semibold'>AI 助手</span>
+        </button>
+      </div>
     </PageLayout>
   );
 }

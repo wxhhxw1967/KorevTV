@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
-import { ChevronLeft, ChevronRight, Info, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Info, Play, Brain } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -240,6 +240,15 @@ export default function HeroBanner({
               <Info className='w-4 h-4 sm:w-5 sm:h-5' />
               <span>更多</span>
             </button>
+            {onRecommend && (
+              <button
+                onClick={() => onRecommend(currentItem.title)}
+                className='flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 bg-white/10 backdrop-blur-sm text-white font-semibold rounded-xl hover:bg-white/20 transition-all transform hover:scale-105 active:scale-95 shadow-lg text-sm sm:text-base'
+              >
+                <Brain className='w-4 h-4 sm:w-5 sm:h-5' />
+                <span>智能推荐</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

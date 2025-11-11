@@ -358,6 +358,15 @@ function PlayPageClient() {
   const [qualityInfo, setQualityInfo] = useState<{ height?: number; bitrate?: number } | null>(null);
   const [netSpeedMbps, setNetSpeedMbps] = useState<number | null>(null);
 
+  // 播放指标与质量控制相关状态
+  const [showMetricsPanel, setShowMetricsPanel] = useState(false);
+  const [availableLevels, setAvailableLevels] = useState<Array<{ index: number; height?: number; bitrate?: number }>>([]);
+  const [qualityMode, setQualityMode] = useState<'auto' | 'locked'>('auto');
+  const [bufferSeconds, setBufferSeconds] = useState<number | null>(null);
+  const [bandwidthEstimateMbps, setBandwidthEstimateMbps] = useState<number | null>(null);
+  const [playbackQuality, setPlaybackQuality] = useState<{ dropped?: number; total?: number } | null>(null);
+  const metricsIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   // 换源加载状态
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [videoLoadingStage, setVideoLoadingStage] = useState<
@@ -2847,6 +2856,14 @@ function PlayPageClient() {
                 if (cur) {
                   setQualityInfo({ height: (cur as any).height, bitrate: (cur as any).bitrate });
                 }
+                // 收集所有清晰度层级
+                const lvls = ((hls as any).levels || []).map((lvl: any, idx: number) => ({ index: idx, height: lvl.height, bitrate: lvl.bitrate }));
+                setAvailableLevels(lvls);
+                // 同步模式（自动/锁定）
+                try {
+                  const autoEnabled = (hls as any).autoLevelEnabled;
+                  setQualityMode(autoEnabled ? 'auto' : 'locked');
+                } catch (_) { /* noop */ }
               } catch (_) {
                 // ignore
               }
@@ -3885,7 +3902,57 @@ function PlayPageClient() {
     };
 
     loadAndInit();
-  }, [Hls, videoUrl, loading, blockAdEnabled]);
+}, [Hls, videoUrl, loading, blockAdEnabled]);
+
+  // 指标采集轮询：缓冲、带宽估计、丢帧
+  useEffect(() => {
+    // 清理旧的定时器
+    if (metricsIntervalRef.current) {
+      clearInterval(metricsIntervalRef.current);
+      metricsIntervalRef.current = null;
+    }
+
+    metricsIntervalRef.current = setInterval(() => {
+      const videoEl: HTMLVideoElement | null = artPlayerRef.current?.video || null;
+      const hls: any = videoEl?.hls || null;
+      // 缓冲秒数
+      if (videoEl) {
+        try {
+          const buffered = videoEl.buffered;
+          const len = buffered.length;
+          if (len > 0) {
+            const end = buffered.end(len - 1);
+            const cur = videoEl.currentTime;
+            const buf = Math.max(0, end - cur);
+            setBufferSeconds(Number(buf.toFixed(1)));
+          }
+        } catch (_) { /* noop */ }
+        // 丢帧统计
+        try {
+          const q: any = (videoEl as any).getVideoPlaybackQuality ? (videoEl as any).getVideoPlaybackQuality() : null;
+          if (q) {
+            setPlaybackQuality({ dropped: q.droppedVideoFrames, total: q.totalVideoFrames });
+          }
+        } catch (_) { /* noop */ }
+      }
+      // 带宽估计
+      if (hls && typeof hls.bandwidthEstimate === 'number') {
+        const mbps = hls.bandwidthEstimate / 1000000; // bps -> Mbps
+        setBandwidthEstimateMbps(Number(mbps.toFixed(2)));
+        // 同步当前模式状态
+        try {
+          setQualityMode(hls.autoLevelEnabled ? 'auto' : 'locked');
+        } catch (_) { /* noop */ }
+      }
+    }, 1000);
+
+    return () => {
+      if (metricsIntervalRef.current) {
+        clearInterval(metricsIntervalRef.current);
+        metricsIntervalRef.current = null;
+      }
+    };
+  }, [videoUrl]);
 
   // 当组件卸载时清理定时器、Wake Lock 和播放器资源
   useEffect(() => {
@@ -4201,7 +4268,7 @@ function PlayPageClient() {
                 </button>
 
                 {/* 清晰度/码率/网速徽章 - 放置在 ? 按钮右侧 */}
-                <div className='absolute left-14 top-4 z-10 flex flex-wrap items-center gap-2'>
+                <div className='absolute left-14 top-4 z-10 flex flex-wrap items-center gap-2' onClick={() => setShowMetricsPanel(true)}>
                   {qualityInfo?.height && (
                     <span className='px-2 py-1 text-xs rounded-full bg-black/40 text-white border border-white/30 backdrop-blur-sm'>
                       {qualityInfo.height}p
@@ -4217,7 +4284,69 @@ function PlayPageClient() {
                       {netSpeedMbps.toFixed(2)} Mbps
                     </span>
                   )}
+                  {/* 面板开关按钮 */}
+                  <button
+                    onClick={() => setShowMetricsPanel((v) => !v)}
+                    className='px-2 py-1 text-xs rounded-full bg-black/40 text-white border border-white/30 backdrop-blur-sm hover:bg-black/60 transition-colors'
+                    title='质量/指标'
+                  >
+                    {showMetricsPanel ? '收起' : '质量'}
+                  </button>
                 </div>
+
+                {/* 质量与实时指标面板 */}
+                {showMetricsPanel && (
+                  <div className='absolute left-4 top-14 z-10 min-w-[240px] max-w-[320px] p-3 rounded-xl bg-black/50 text-white border border-white/30 backdrop-blur-md shadow-lg'>
+                    <div className='mb-2 text-xs opacity-80'>
+                      模式：{qualityMode === 'auto' ? '自动档' : '已锁定'}
+                    </div>
+                    <div className='grid grid-cols-2 gap-2 text-xs'>
+                      <div className='flex items-center justify-between'><span className='opacity-80'>分辨率</span><span>{qualityInfo?.height ? `${qualityInfo.height}p` : '-'}</span></div>
+                      <div className='flex items-center justify-between'><span className='opacity-80'>码率</span><span>{qualityInfo?.bitrate ? `${Math.round((qualityInfo.bitrate as number) / 1000)} kbps` : '-'}</span></div>
+                      <div className='flex items-center justify-between'><span className='opacity-80'>带宽估计</span><span>{typeof bandwidthEstimateMbps === 'number' ? `${bandwidthEstimateMbps.toFixed(2)} Mbps` : '-'}</span></div>
+                      <div className='flex items-center justify-between'><span className='opacity-80'>缓冲</span><span>{typeof bufferSeconds === 'number' ? `${bufferSeconds.toFixed(1)} s` : '-'}</span></div>
+                      <div className='flex items-center justify-between'><span className='opacity-80'>丢帧/总帧</span><span>{playbackQuality ? `${playbackQuality.dropped || 0}/${playbackQuality.total || 0}` : '-'}</span></div>
+                    </div>
+                    <div className='mt-3'>
+                      <label className='block text-xs mb-1 opacity-80'>清晰度选择</label>
+                      <select
+                        className='w-full text-xs bg-black/40 border border-white/30 rounded-md px-2 py-1'
+                        value={qualityMode === 'auto' ? 'auto' : String(artPlayerRef.current?.video?.hls?.currentLevel ?? -1)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const hls: any = artPlayerRef.current?.video?.hls;
+                          if (!hls) return;
+                          if (val === 'auto') {
+                            try {
+                              hls.autoLevelEnabled = true;
+                              setQualityMode('auto');
+                            } catch (_) { /* noop */ }
+                          } else {
+                            const idx = parseInt(val, 10);
+                            if (!Number.isNaN(idx)) {
+                              try {
+                                hls.autoLevelEnabled = false;
+                                hls.currentLevel = idx;
+                                setQualityMode('locked');
+                                const lvl = hls.levels?.[idx];
+                                if (lvl) {
+                                  setQualityInfo({ height: lvl.height, bitrate: lvl.bitrate });
+                                }
+                              } catch (_) { /* noop */ }
+                            }
+                          }
+                        }}
+                      >
+                        <option value='auto'>自动</option>
+                        {availableLevels.map((lvl) => (
+                          <option key={lvl.index} value={String(lvl.index)}>
+                            {lvl.height ? `${lvl.height}p` : `Level ${lvl.index}`} {lvl.bitrate ? `• ${Math.round((lvl.bitrate as number) / 1000)} kbps` : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                )}
 
                 {/* 跳过设置按钮 - 播放器内右上角 */}
                 {currentSource && currentId && (
