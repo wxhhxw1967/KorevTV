@@ -2,7 +2,7 @@
 
 'use client';
 
-import { AlertCircle, CheckCircle, User, Lock, Sparkles, UserPlus, Send } from 'lucide-react';
+import { AlertCircle, CheckCircle, User, Lock, Sparkles, UserPlus, Send, Eye, EyeOff } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
 
@@ -73,6 +73,8 @@ function LoginPageClient() {
   const [loading, setLoading] = useState(false);
   const [shouldAskUsername, setShouldAskUsername] = useState(false);
   const [bingWallpaper, setBingWallpaper] = useState<string>('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [capsLockOn, setCapsLockOn] = useState(false);
 
   // Telegram Magic Link 状态
   const [telegramLoading, setTelegramLoading] = useState(false);
@@ -106,6 +108,12 @@ function LoginPageClient() {
       setShouldAskUsername(storageType && storageType !== 'localstorage');
     }
   }, []);
+
+  useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(null), 5000);
+    return () => clearTimeout(t);
+  }, [error]);
 
   // 获取 Telegram Magic Link 配置
   useEffect(() => {
@@ -276,24 +284,41 @@ function LoginPageClient() {
             <label htmlFor='password' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
               密码
             </label>
-            <div className='relative'>
-              <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                <Lock className='h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-green-500 transition-colors' />
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                  <Lock className='h-5 w-5 text-gray-400 dark:text-gray-500 group-focus-within:text-green-500 transition-colors' />
+                </div>
+                <input
+                  id='password'
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete='current-password'
+                  className='block w-full pl-12 pr-4 py-3.5 rounded-xl border-0 text-gray-900 dark:text-gray-100 shadow-sm ring-2 ring-white/60 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:outline-none sm:text-base bg-white/80 dark:bg-zinc-800/80 backdrop-blur transition-all duration-300 hover:shadow-md'
+                  placeholder='请输入访问密码'
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyUp={(e) => {
+                    const caps = (e as any).getModifierState?.('CapsLock');
+                    if (typeof caps === 'boolean') setCapsLockOn(caps);
+                  }}
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? '隐藏密码' : '显示密码'}
+                  className='absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300'
+                >
+                  {showPassword ? <EyeOff className='h-5 w-5' /> : <Eye className='h-5 w-5' />}
+                </button>
               </div>
-              <input
-                id='password'
-                type='password'
-                autoComplete='current-password'
-                className='block w-full pl-12 pr-4 py-3.5 rounded-xl border-0 text-gray-900 dark:text-gray-100 shadow-sm ring-2 ring-white/60 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-green-500 dark:focus:ring-green-400 focus:outline-none sm:text-base bg-white/80 dark:bg-zinc-800/80 backdrop-blur transition-all duration-300 hover:shadow-md'
-                placeholder='请输入访问密码'
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+              {capsLockOn && (
+                <div className='mt-2 text-xs text-red-600 dark:text-red-400'>
+                  检测到 Caps Lock 已开启，可能导致密码输入错误
+                </div>
+              )}
           </div>
 
           {error && (
-            <div className='flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 animate-slide-down'>
+            <div className='flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 animate-slide-down' role='alert' aria-live='assertive'>
               <AlertCircle className='h-4 w-4 text-red-600 dark:text-red-400 flex-shrink-0' />
               <p className='text-sm text-red-600 dark:text-red-400'>{error}</p>
             </div>
@@ -311,6 +336,13 @@ function LoginPageClient() {
             <Lock className='h-5 w-5' />
             {loading ? '登录中...' : '立即登录'}
           </button>
+
+          <div className='mt-2 text-xs text-gray-500 dark:text-gray-400 flex items-center justify-between'>
+            <span>{shouldAskUsername ? '账户密码模式' : '本地密码模式'}</span>
+            {searchParams.get('redirect') && (
+              <span>登录后将前往 {decodeURIComponent(searchParams.get('redirect') || '')}</span>
+            )}
+          </div>
 
           {/* 注册链接 - 仅在非 localStorage 模式下显示 */}
           {shouldAskUsername && (
