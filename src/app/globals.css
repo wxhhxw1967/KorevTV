@@ -517,13 +517,9 @@ html.dark .lgx-tint-pink {
     transparent 52%
   );
   background-size: 220% 100%;
-  opacity: 0;
+  opacity: 0.16;
   transition: opacity 160ms ease;
-}
-.group:hover .title-sweep,
-.title-sweep.hover {
-  opacity: 0.24;
-  animation: title-sweep-move 1.8s ease-in-out infinite;
+  animation: title-sweep-move 4.8s ease-in-out infinite;
 }
 @keyframes title-sweep-move {
   0% { background-position: -120% 0; }
