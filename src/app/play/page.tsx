@@ -395,6 +395,7 @@ function PlayPageClient() {
 
   // 播放指标与质量控制相关状态
   const [showMetricsPanel, setShowMetricsPanel] = useState(false);
+  const [showAllCast, setShowAllCast] = useState(false);
   const [prefetchNextEnabled, setPrefetchNextEnabled] = useState<boolean>(
     () => {
       if (typeof window !== 'undefined') {
@@ -5579,7 +5580,19 @@ function PlayPageClient() {
                                 <span className='relative text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 via-amber-600 to-yellow-600 dark:from-yellow-400 dark:via-amber-400 dark:to-yellow-400 font-bold text-lg transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_2px_8px_rgba(251,191,36,0.5)]'>
                                   {movieDetails.rate}
                                 </span>
-                                <span className='ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-black/10 dark:bg-white/10 border border-white/20 text-gray-800 dark:text-gray-200'>豆瓣</span>
+                                {videoDoubanId !== 0 ? (
+                                  <a
+                                    href={`https://movie.douban.com/subject/${videoDoubanId}`}
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-black/10 dark:bg-white/10 border border-white/20 text-gray-800 dark:text-gray-200'
+                                    aria-label='打开豆瓣页面'
+                                  >
+                                    豆瓣
+                                  </a>
+                                ) : (
+                                  <span className='ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-black/10 dark:bg-white/10 border border-white/20 text-gray-800 dark:text-gray-200'>豆瓣</span>
+                                )}
                                 <div className='flex ml-2 gap-0.5'>
                                   {[...Array(5)].map((_, i) => (
                                     <svg
@@ -5641,10 +5654,19 @@ function PlayPageClient() {
                               主演:
                             </span>
                             <span className='inline-flex flex-wrap gap-2 chips-unify'>
-                              {movieDetails.cast.slice(0, 10).map((n: string, i: number) => (
+                              {(showAllCast ? movieDetails.cast : movieDetails.cast.slice(0, 10)).map((n: string, i: number) => (
                                 <span key={i}>{n}</span>
                               ))}
                             </span>
+                            {movieDetails.cast.length > 10 && (
+                              <button
+                                onClick={() => setShowAllCast((v) => !v)}
+                                className='ml-2 px-2 py-0.5 rounded-full text-xs border border-white/30 bg-black/10 text-gray-800 dark:bg-white/10 dark:text-gray-200 backdrop-blur-sm'
+                                aria-label={showAllCast ? '收起主演' : '展开全部主演'}
+                              >
+                                {showAllCast ? '收起' : '展开全部'}
+                              </button>
+                            )}
                           </div>
                         )}
 
