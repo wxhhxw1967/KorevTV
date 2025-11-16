@@ -12,6 +12,7 @@ interface LiquidGlassContainerProps {
   border?: 'subtle' | 'normal';
   shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   animated?: boolean; // 是否启用液态玻璃动效
+  animatedMode?: 'always' | 'hover' | 'inview'; // 动效触发模式
 }
 
 export default function LiquidGlassContainer({
@@ -22,11 +23,14 @@ export default function LiquidGlassContainer({
   border = 'subtle',
   shadow = 'lg',
   animated = true,
+  animatedMode = 'inview',
 }: LiquidGlassContainerProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [inView, setInView] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+  const [motionReduced, setMotionReduced] = useState(false);
   useEffect(() => {
-    if (!animated) return;
+    if (!animated || animatedMode !== 'inview') return;
     const el = rootRef.current;
     if (!el || typeof window === 'undefined') return;
     const obs = new IntersectionObserver(
@@ -40,7 +44,18 @@ export default function LiquidGlassContainer({
     return () => {
       obs.disconnect();
     };
-  }, [animated]);
+  }, [animated, animatedMode]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const handler = (e: MediaQueryListEvent) => setMotionReduced(e.matches);
+      setMotionReduced(mq.matches);
+      mq.addEventListener?.('change', handler);
+      return () => mq.removeEventListener?.('change', handler);
+    } catch {}
+  }, []);
   const intensityClasses =
     intensity === 'strong'
       ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-3xl'
@@ -82,9 +97,18 @@ export default function LiquidGlassContainer({
       ? 'lgx-overlay--low'
       : 'lgx-overlay--medium';
 
+  const shouldAnimate =
+    animated && !motionReduced &&
+    (animatedMode === 'always' || (animatedMode === 'hover' && isHovered) || (animatedMode === 'inview' && inView));
+
   return (
-    <div ref={rootRef} className={classes}>
-      {animated && inView && (
+    <div
+      ref={rootRef}
+      className={classes}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {shouldAnimate && (
         <>
           <span
             aria-hidden
