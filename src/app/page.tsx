@@ -26,6 +26,7 @@ import { ReleaseCalendarItem,ShortDramaItem } from '@/lib/types';
 import { DoubanItem } from '@/lib/types';
 
 import AIRecommendModal from '@/components/AIRecommendModal';
+import LiquidGlassContainer from '@/components/LiquidGlassContainer';
 import CapsuleSwitch from '@/components/CapsuleSwitch';
 import ContinueWatching from '@/components/ContinueWatching';
 import HeroBanner from '@/components/HeroBanner';
@@ -687,7 +688,9 @@ function HomeClient() {
           ) : activeTab === 'continue' ? (
             // 继续观看视图（仅首页的中间页）
             <section className='mb-8'>
-              <ContinueWatching />
+              <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
+                <ContinueWatching />
+              </LiquidGlassContainer>
             </section>
           ) : (
             // 首页视图
@@ -695,7 +698,8 @@ function HomeClient() {
               {null}
               {/* Hero Banner 轮播 */}
               {!loading && (hotMovies.length > 0 || hotTvShows.length > 0 || hotVarietyShows.length > 0 || hotShortDramas.length > 0) && (
-                <section className='mb-8 home-section'>
+                <section className='mb-8'>
+                  <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
                   <HeroBanner
                     items={[
                       // 豆瓣电影
@@ -813,11 +817,14 @@ function HomeClient() {
                     showIndicators={true}
                     onRecommend={() => setShowAIRecommendModal(true)}
                   />
+                  </LiquidGlassContainer>
                 </section>
               )}
               {loading && (
-                <section className='mb-8 home-section'>
-                  <div className='w-full h-[320px] sm:h-[360px] md:h-[300px] rounded-2xl border border-white/20 dark:border-gray-700/50 bg-white/60 dark:bg-gray-800/50 backdrop-blur-md shadow-[0_12px_36px_rgba(0,0,0,0.15)] animate-pulse'></div>
+                <section className='mb-8'>
+                  <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
+                    <div className='w-full h-[320px] sm:h-[360px] md:h-[300px] rounded-2xl border border-white/20 dark:border-gray-700/50 bg-white/60 dark:bg-gray-800/50 backdrop-blur-md shadow-[0_12px_36px_rgba(0,0,0,0.15)] animate-pulse'></div>
+                  </LiquidGlassContainer>
                 </section>
               )}
 
@@ -830,6 +837,7 @@ function HomeClient() {
               })()}
               {!loading && upcomingReleases.length > 0 && (
                 <section className='mb-8'>
+                  <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
                   <div className='mb-4 flex items-center justify-between'>
                     <SectionTitle title="即将上映" icon={Calendar} iconColor="text-orange-500" />
                     <Link
@@ -870,11 +878,13 @@ function HomeClient() {
                       );
                     })}
                   </ScrollableRow>
+                  </LiquidGlassContainer>
                 </section>
               )}
 
               {/* 热门电影 */}
-              <section className='mb-8 home-section'>
+              <section className='mb-8'>
+                <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
                 <div className='mb-4 flex items-center justify-between'>
                   <SectionTitle title="热门电影" icon={Film} iconColor="text-red-500" />
                   <Link
@@ -909,10 +919,12 @@ function HomeClient() {
                       </div>
                     ))}
                 </ScrollableRow>
+                </LiquidGlassContainer>
               </section>
 
               {/* 热门剧集 */}
               <section className='mb-8 home-section'>
+                <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
                 <div className='mb-4 flex items-center justify-between'>
                   <SectionTitle title="热门剧集" icon={Tv} iconColor="text-blue-500" />
                   <Link
@@ -947,10 +959,12 @@ function HomeClient() {
                       </div>
                     ))}
                 </ScrollableRow>
+                </LiquidGlassContainer>
               </section>
 
               {/* 每日新番放送 */}
               <section className='mb-8 home-section'>
+                <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
                 <div className='mb-4 flex items-center justify-between'>
                   <SectionTitle title="新番放送" icon={Calendar} iconColor="text-purple-500" />
                   <Link
@@ -1013,10 +1027,12 @@ function HomeClient() {
                       ));
                     })()}
                 </ScrollableRow>
+                </LiquidGlassContainer>
               </section>
 
               {/* 热门综艺 */}
               <section className='mb-8 home-section'>
+                <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
                 <div className='mb-4 flex items-center justify-between'>
                   <SectionTitle title="热门综艺" icon={Sparkles} iconColor="text-pink-500" />
                   <Link
@@ -1051,10 +1067,12 @@ function HomeClient() {
                       </div>
                     ))}
                 </ScrollableRow>
+                </LiquidGlassContainer>
               </section>
 
               {/* 热门短剧 */}
               <section className='mb-8'>
+                <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
                 <div className='mb-4 flex items-center justify-between'>
                   <SectionTitle title="热门短剧" icon={Play} iconColor="text-orange-500" />
                   <Link
@@ -1081,6 +1099,7 @@ function HomeClient() {
                       </div>
                     ))}
                 </ScrollableRow>
+                </LiquidGlassContainer>
               </section>
             </>
           )}
@@ -1160,6 +1179,7 @@ function HomeClient() {
       {(aiEnabled === true && aiCheckTriggered && personalRecommendEnabled) && (
         <div className='mt-8 space-y-6'>
           {/* 为你推荐 */}
+          <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
           <div>
             <div className='mb-3 flex items-center justify-between'>
               <SectionTitle title='为你推荐' icon={Sparkles} iconColor='text-pink-500' />
@@ -1190,8 +1210,10 @@ function HomeClient() {
               ))}
             </div>
           </div>
+          </LiquidGlassContainer>
 
           {/* 最近热播 */}
+          <LiquidGlassContainer roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animated={false} tint='blue'>
           <div>
             <div className='mb-3 flex items-center justify-between'>
               <SectionTitle title='最近热播' icon={Tv} iconColor='text-red-500' />
@@ -1209,6 +1231,7 @@ function HomeClient() {
               快速浏览近期热门影视内容，支持按类型提问。
             </div>
           </div>
+          </LiquidGlassContainer>
 
           {/* 个性化开关 */}
           <div className='flex items-center justify-end'>
@@ -1238,20 +1261,7 @@ function HomeClient() {
           <span className='hidden sm:inline text-sm font-semibold'>AI 助手</span>
         </button>
       </div>
-      <style jsx>{`
-        .home-section {
-          border-radius: 16px;
-          border: 1px solid rgba(255,255,255,0.2);
-          background: rgba(255,255,255,0.7);
-          backdrop-filter: saturate(180%) blur(12px);
-          box-shadow: 0 12px 36px rgba(0,0,0,0.15);
-          padding: 12px;
-        }
-        :global(html.dark) .home-section {
-          border-color: rgba(55,65,81,0.6);
-          background: rgba(31,41,55,0.6);
-        }
-      `}</style>
+      <style jsx>{``}</style>
     </PageLayout>
   );
 }

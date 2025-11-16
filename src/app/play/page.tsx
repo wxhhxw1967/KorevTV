@@ -395,6 +395,7 @@ function PlayPageClient() {
 
   // 播放指标与质量控制相关状态
   const [showMetricsPanel, setShowMetricsPanel] = useState(false);
+  const [showAllCast, setShowAllCast] = useState(false);
   const [prefetchNextEnabled, setPrefetchNextEnabled] = useState<boolean>(
     () => {
       if (typeof window !== 'undefined') {
@@ -4972,21 +4973,37 @@ function PlayPageClient() {
                       {netSpeedMbps.toFixed(2)} Mbps
                     </span>
                   )}
-                  {/* 面板开关按钮 */}
-                  <button
-                    onClick={() => setShowMetricsPanel((v) => !v)}
-                    className='px-2 py-1 text-xs rounded-full bg-black/40 text-white border border-white/30 backdrop-blur-sm hover:bg-black/60 transition-colors'
-                    title='质量/指标'
+                  {/* 面板开关按钮（玻璃胶囊） */}
+                  <LiquidGlassContainer
+                    className='px-2 py-1 text-xs cursor-pointer inline-flex'
+                    roundedClass='rounded-full'
+                    intensity='medium'
+                    shadow='lg'
+                    border='subtle'
+                    animatedMode='hover'
+                    tint='blue'
                   >
-                    {showMetricsPanel ? '收起' : '质量'}
-                  </button>
+                    <button
+                      onClick={() => setShowMetricsPanel((v) => !v)}
+                      className='text-gray-800 dark:text-gray-200'
+                      title='质量/指标'
+                    >
+                      {showMetricsPanel ? '收起' : '质量'}
+                    </button>
+                  </LiquidGlassContainer>
                 </div>
 
                 {/* 质量与实时指标面板 */}
                 {showMetricsPanel && (
-                  <div
-                    className='absolute left-4 top-14 min-w-[240px] max-w-[320px] p-3 rounded-xl bg-black/50 text-white border border-white/30 backdrop-blur-md shadow-lg'
-                    style={{ zIndex: 2147483647 }}
+                  <LiquidGlassContainer
+                    className='absolute left-4 top-14 min-w-[240px] max-w-[320px] p-3'
+                    roundedClass='rounded-xl'
+                    intensity='high'
+                    shadow='xl'
+                    border='subtle'
+                    animatedMode='hover'
+                    tint='blue'
+                    style={{ zIndex: 2147483647 } as any}
                   >
                     <div className='mb-2 text-xs opacity-80'>
                       模式：{qualityMode === 'auto' ? '自动档' : '已锁定'}
@@ -5202,7 +5219,7 @@ function PlayPageClient() {
                         预取下一集
                       </label>
                     </div>
-                  </div>
+                  </LiquidGlassContainer>
                 )}
 
                 {/* 跳过设置按钮 - 播放器内右上角 */}
@@ -5210,13 +5227,10 @@ function PlayPageClient() {
                   <div className='absolute top-4 right-4 z-10 flex items-center gap-2'>
                     <button
                       onClick={() => setIsSkipSettingOpen(true)}
-                      className='group flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-xl rounded-xl border border-white/30 hover:border-white/50 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:shadow-[0_8px_32px_0_rgba(255,255,255,0.18)] hover:scale-105 transition-all duration-300 ease-out'
+                      className='group flex items-center gap-2'
                       title='跳过设置'
-                      style={{
-                        backdropFilter: 'blur(20px) saturate(180%)',
-                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                      }}
                     >
+                      <LiquidGlassContainer className='px-4 py-2' roundedClass='rounded-xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
                       <svg
                         className='w-5 h-5 text-white drop-shadow-lg group-hover:rotate-90 transition-all duration-300'
                         fill='none'
@@ -5233,20 +5247,14 @@ function PlayPageClient() {
                       <span className='text-sm font-medium text-white drop-shadow-lg transition-all duration-300 hidden sm:inline'>
                         跳过设置
                       </span>
+                      </LiquidGlassContainer>
                     </button>
                     <button
                       onClick={() => setTheaterMode((prev) => !prev)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl border shadow-sm transition-all duration-300 ease-out ${
-                        theaterMode
-                          ? 'bg-emerald-500/80 text-white border-white/30 hover:bg-emerald-500'
-                          : 'bg-white/10 text-white border-white/30 hover:bg-white/20'
-                      }`}
+                      className={`flex items-center gap-2`}
                       title='影院模式'
-                      style={{
-                        backdropFilter: 'blur(20px) saturate(180%)',
-                        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                      }}
                     >
+                      <LiquidGlassContainer className='px-3 py-2' roundedClass='rounded-xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
                       <svg
                         className='w-5 h-5'
                         fill='none'
@@ -5261,6 +5269,7 @@ function PlayPageClient() {
                         />
                       </svg>
                       <span className='text-sm font-medium'>影院模式</span>
+                      </LiquidGlassContainer>
                     </button>
                   </div>
                 )}
@@ -5349,14 +5358,24 @@ function PlayPageClient() {
 
         {/* 一起观看 - 播放器下方工具栏与面板 */}
         <div className='mt-4'>
-          <WatchPartyPanel />
+          <LiquidGlassContainer
+            className='px-4 py-3'
+            roundedClass='rounded-2xl'
+            intensity='high'
+            shadow='xl'
+            border='subtle'
+            animatedMode='hover'
+            tint='blue'
+          >
+            <WatchPartyPanel />
+          </LiquidGlassContainer>
         </div>
 
         {/* 详情展示 */}
         <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           {/* 文字区 */}
           <div className='md:col-span-3'>
-            <div className='p-6 flex flex-col min-h-0 rounded-2xl border border-white/20 dark:border-gray-700/50 bg-white/70 dark:bg-gray-800/60 backdrop-blur-xl shadow-[0_12px_36px_0_rgba(0,0,0,0.15)]'>
+            <LiquidGlassContainer className='p-6 flex flex-col min-h-0' roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
               {/* 标题 */}
               <div className='mb-4 flex-shrink-0'>
                 <div className='flex flex-col md:flex-row md:items-center gap-3'>
@@ -5404,7 +5423,6 @@ function PlayPageClient() {
                       }}
                       className='group relative flex-shrink-0 transition-all duration-300 hover:scale-105'
                     >
-                      <div className='absolute inset-0 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full opacity-0 group-hover:opacity-30 blur-xl transition-opacity duration-300'></div>
                       <div className='relative flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300'>
                         📁
                         {netdiskLoading ? (
@@ -5579,7 +5597,19 @@ function PlayPageClient() {
                                 <span className='relative text-transparent bg-clip-text bg-gradient-to-r from-yellow-600 via-amber-600 to-yellow-600 dark:from-yellow-400 dark:via-amber-400 dark:to-yellow-400 font-bold text-lg transition-all duration-300 group-hover:scale-110 group-hover:drop-shadow-[0_2px_8px_rgba(251,191,36,0.5)]'>
                                   {movieDetails.rate}
                                 </span>
-                                <span className='ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-black/10 dark:bg-white/10 border border-white/20 text-gray-800 dark:text-gray-200'>豆瓣</span>
+                                {videoDoubanId !== 0 ? (
+                                  <a
+                                    href={`https://movie.douban.com/subject/${videoDoubanId}`}
+                                    target='_blank'
+                                    rel='noopener noreferrer'
+                                    className='ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-black/10 dark:bg-white/10 border border-white/20 text-gray-800 dark:text-gray-200'
+                                    aria-label='打开豆瓣页面'
+                                  >
+                                    豆瓣
+                                  </a>
+                                ) : (
+                                  <span className='ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] bg-black/10 dark:bg-white/10 border border-white/20 text-gray-800 dark:text-gray-200'>豆瓣</span>
+                                )}
                                 <div className='flex ml-2 gap-0.5'>
                                   {[...Array(5)].map((_, i) => (
                                     <svg
@@ -5641,10 +5671,19 @@ function PlayPageClient() {
                               主演:
                             </span>
                             <span className='inline-flex flex-wrap gap-2 chips-unify'>
-                              {movieDetails.cast.slice(0, 10).map((n: string, i: number) => (
+                              {(showAllCast ? movieDetails.cast : movieDetails.cast.slice(0, 10)).map((n: string, i: number) => (
                                 <span key={i}>{n}</span>
                               ))}
                             </span>
+                            {movieDetails.cast.length > 10 && (
+                              <button
+                                onClick={() => setShowAllCast((v) => !v)}
+                                className='ml-2 px-2 py-0.5 rounded-full text-xs border border-white/30 bg-black/10 text-gray-800 dark:bg-white/10 dark:text-gray-200 backdrop-blur-sm'
+                                aria-label={showAllCast ? '收起主演' : '展开全部主演'}
+                              >
+                                {showAllCast ? '收起' : '展开全部'}
+                              </button>
+                            )}
                           </div>
                         )}
 
@@ -5675,28 +5714,13 @@ function PlayPageClient() {
                                 <span key={index}>{language}</span>
                               ))}
                           {movieDetails.episodes && (
-                            <span className='relative group bg-gradient-to-r from-green-500/90 to-emerald-500/90 dark:from-green-600/90 dark:to-emerald-600/90 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md hover:shadow-lg hover:shadow-green-500/30 transition-all duration-300 hover:scale-105'>
-                              <span className='absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity duration-300'></span>
-                              <span className='relative'>
-                                共{movieDetails.episodes}集
-                              </span>
-                            </span>
+                            <span className='chips-unify'>共{movieDetails.episodes}集</span>
                           )}
                           {movieDetails.episode_length && (
-                            <span className='relative group bg-gradient-to-r from-orange-500/90 to-amber-500/90 dark:from-orange-600/90 dark:to-amber-600/90 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md hover:shadow-lg hover:shadow-orange-500/30 transition-all duration-300 hover:scale-105'>
-                              <span className='absolute inset-0 bg-gradient-to-r from-orange-400 to-amber-400 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity duration-300'></span>
-                              <span className='relative'>
-                                单集{movieDetails.episode_length}分钟
-                              </span>
-                            </span>
+                            <span className='chips-unify'>单集{movieDetails.episode_length}分钟</span>
                           )}
                           {movieDetails.movie_duration && (
-                            <span className='relative group bg-gradient-to-r from-red-500/90 to-rose-500/90 dark:from-red-600/90 dark:to-rose-600/90 text-white px-3 py-1 rounded-full text-xs font-medium shadow-md hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300 hover:scale-105'>
-                              <span className='absolute inset-0 bg-gradient-to-r from-red-400 to-rose-400 rounded-full opacity-0 group-hover:opacity-20 blur transition-opacity duration-300'></span>
-                              <span className='relative'>
-                                {movieDetails.movie_duration}分钟
-                              </span>
-                            </span>
+                            <span className='chips-unify'>{movieDetails.movie_duration}分钟</span>
                           )}
                         </div>
                       </div>
@@ -5777,7 +5801,7 @@ function PlayPageClient() {
 
               {/* 网盘资源区域 */}
               <div id='netdisk-section' className='mt-6'>
-                <div className='border-t border-gray-200 dark:border-gray-700 pt-6'>
+                <LiquidGlassContainer className='pt-6 px-4 pb-4' roundedClass='rounded-2xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
                   <div className='mb-4'>
                     <h3 className='text-xl font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2'>
                       📁 网盘资源
@@ -5812,14 +5836,15 @@ function PlayPageClient() {
                     error={netdiskError}
                     total={netdiskTotal}
                   />
-                </div>
+                </LiquidGlassContainer>
               </div>
-            </div>
+            </LiquidGlassContainer>
           </div>
 
           {/* 封面展示 */}
           <div className='hidden md:block md:col-span-1 md:order-first'>
             <div className='pl-0 py-4 pr-6'>
+              <LiquidGlassContainer className='p-2' roundedClass='rounded-xl' intensity='high' shadow='xl' border='subtle' animatedMode='hover' tint='blue'>
               <div className='group relative bg-gray-300 dark:bg-gray-700 aspect-[2/3] flex items-center justify-center rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500 hover:scale-[1.02]'>
                 {videoCover || bangumiDetails?.images?.large ? (
                   <>
@@ -5893,6 +5918,7 @@ function PlayPageClient() {
                   </span>
                 )}
               </div>
+              </LiquidGlassContainer>
             </div>
           </div>
         </div>
@@ -5910,6 +5936,7 @@ function PlayPageClient() {
           display: inline-flex;
           align-items: center;
           backdrop-filter: saturate(180%) blur(10px);
+          transition: transform 150ms ease, box-shadow 150ms ease, filter 150ms ease;
         }
         :global(html.dark) .chips-unify span {
           background: rgba(255, 255, 255, 0.08);
@@ -5917,7 +5944,9 @@ function PlayPageClient() {
           border-color: rgba(255, 255, 255, 0.2);
         }
         .chips-unify span:hover {
-          filter: brightness(1.05);
+          filter: brightness(1.06);
+          transform: translateY(-1px) scale(1.03);
+          box-shadow: 0 6px 14px rgba(0,0,0,0.12);
         }
       `}</style>
       <button

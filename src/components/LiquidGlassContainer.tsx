@@ -2,6 +2,7 @@
 
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface LiquidGlassContainerProps {
   children: ReactNode;
@@ -11,6 +12,8 @@ interface LiquidGlassContainerProps {
   border?: 'subtle' | 'normal';
   shadow?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   animated?: boolean; // 是否启用液态玻璃动效
+  animatedMode?: 'always' | 'hover' | 'inview'; // 动效触发模式
+  tint?: 'blue' | 'neutral' | 'pink';
 }
 
 export default function LiquidGlassContainer({
@@ -21,7 +24,40 @@ export default function LiquidGlassContainer({
   border = 'subtle',
   shadow = 'lg',
   animated = true,
+  animatedMode = 'inview',
+  tint = 'blue',
 }: LiquidGlassContainerProps) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(true);
+  const [isHovered, setIsHovered] = useState(false);
+  const [motionReduced, setMotionReduced] = useState(false);
+  useEffect(() => {
+    if (!animated || animatedMode !== 'inview') return;
+    const el = rootRef.current;
+    if (!el || typeof window === 'undefined') return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        setInView(!!first?.isIntersecting);
+      },
+      { root: null, threshold: 0 }
+    );
+    obs.observe(el);
+    return () => {
+      obs.disconnect();
+    };
+  }, [animated, animatedMode]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const handler = (e: MediaQueryListEvent) => setMotionReduced(e.matches);
+      setMotionReduced(mq.matches);
+      mq.addEventListener?.('change', handler);
+      return () => mq.removeEventListener?.('change', handler);
+    } catch {}
+  }, []);
   const intensityClasses =
     intensity === 'strong'
       ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-3xl'
@@ -46,12 +82,13 @@ export default function LiquidGlassContainer({
   };
 
   const classes = clsx(
-    'relative overflow-hidden',
+    'relative overflow-hidden lgx-glass',
     roundedClass,
     intensityClasses,
     borderClasses,
     shadowMap[shadow],
-    className
+    className,
+    tint === 'blue' ? 'lgx-tint-blue' : tint === 'pink' ? 'lgx-tint-pink' : 'lgx-tint-neutral'
   );
 
   const overlayIntensityClass =
@@ -63,9 +100,20 @@ export default function LiquidGlassContainer({
       ? 'lgx-overlay--low'
       : 'lgx-overlay--medium';
 
+  const shouldAnimate =
+    animated && !motionReduced &&
+    (animatedMode === 'always' || (animatedMode === 'hover' && isHovered) || (animatedMode === 'inview' && inView));
+
   return (
-    <div className={classes}>
-      {animated && (
+    <div
+      ref={rootRef}
+      className={classes}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <span aria-hidden className='lgx-specular' />
+      <span aria-hidden className='lgx-edge' />
+      {shouldAnimate && (
         <>
           <span
             aria-hidden
