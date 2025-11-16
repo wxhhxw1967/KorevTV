@@ -371,7 +371,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
               <div className='absolute inset-0 bg-gray-100/50 dark:bg-gray-800/50 group-hover:bg-gray-100 dark:group-hover:bg-gray-800/70 transition-colors duration-300 -z-10'></div>
             )}
             {/* 悬浮光效 */}
-            <div className='absolute inset-0 bg-gradient-to-r from-transparent via-green-100/0 to-transparent dark:via-green-500/0 group-hover:via-green-100/50 dark:group-hover:via-green-500/10 transition-all duration-300 -z-10'></div>
+            <span className='scan-sweep -z-10'></span>
             <span className='relative z-10 font-bold'>选集</span>
           </div>
         )}
@@ -393,7 +393,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
             <div className='absolute inset-0 bg-gray-100/50 dark:bg-gray-800/50 group-hover:bg-gray-100 dark:group-hover:bg-gray-800/70 transition-colors duration-300 -z-10'></div>
           )}
           {/* 悬浮光效 */}
-          <div className='absolute inset-0 bg-gradient-to-r from-transparent via-blue-100/0 to-transparent dark:via-blue-500/0 group-hover:via-blue-100/50 dark:group-hover:via-blue-500/10 transition-all duration-300 -z-10'></div>
+          <span className='scan-sweep -z-10'></span>
           <span className='relative z-10 font-bold'>换源</span>
         </div>
       </div>
@@ -485,7 +485,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
                   )}
                   {/* 悬浮态闪光效果 */}
                   {!isActive && (
-                    <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/0 to-transparent group-hover:via-white/20 dark:group-hover:via-white/10 transition-all duration-300'></div>
+                    <span className='scan-sweep'></span>
                   )}
                   <span className='relative z-10'>
                     {(() => {
@@ -590,7 +590,7 @@ const EpisodeSelector: React.FC<EpisodeSelectorProps> = ({
 
                         {/* 悬浮光效 */}
                         {!isCurrentSource && (
-                          <div className='absolute inset-0 bg-gradient-to-r from-transparent via-white/0 to-transparent group-hover:via-white/30 dark:group-hover:via-white/5 transition-all duration-500 pointer-events-none'></div>
+                          <span className='scan-sweep pointer-events-none'></span>
                         )}
 
                         {/* 封面 */}

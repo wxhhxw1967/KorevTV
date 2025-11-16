@@ -502,3 +502,24 @@ html.dark .lgx-tint-pink {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -2px 8px rgba(0, 0, 0, 0.12);
   pointer-events: none;
 }
+.scan-sweep {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 35%, rgba(255,255,255,0.22) 45%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0.22) 55%, transparent 65%);
+  background-size: 220% 100%;
+  transform: translateZ(0);
+  opacity: 0;
+  transition: opacity 200ms ease, filter 200ms ease;
+}
+.group:hover .scan-sweep,
+.scan-sweep.hover {
+  opacity: 1;
+  animation: scan-sweep-move 2.2s ease-in-out infinite;
+}
+@keyframes scan-sweep-move {
+  0% { background-position: -120% 0; }
+  50% { background-position: 120% 0; }
+  100% { background-position: -120% 0; }
+}
