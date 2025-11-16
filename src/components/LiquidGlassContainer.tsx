@@ -2,6 +2,7 @@
 
 import clsx from 'clsx';
 import type { ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface LiquidGlassContainerProps {
   children: ReactNode;
@@ -22,6 +23,24 @@ export default function LiquidGlassContainer({
   shadow = 'lg',
   animated = true,
 }: LiquidGlassContainerProps) {
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [inView, setInView] = useState(true);
+  useEffect(() => {
+    if (!animated) return;
+    const el = rootRef.current;
+    if (!el || typeof window === 'undefined') return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        setInView(!!first?.isIntersecting);
+      },
+      { root: null, threshold: 0 }
+    );
+    obs.observe(el);
+    return () => {
+      obs.disconnect();
+    };
+  }, [animated]);
   const intensityClasses =
     intensity === 'strong'
       ? 'bg-white/80 dark:bg-gray-900/80 backdrop-blur-3xl'
@@ -64,8 +83,8 @@ export default function LiquidGlassContainer({
       : 'lgx-overlay--medium';
 
   return (
-    <div className={classes}>
-      {animated && (
+    <div ref={rootRef} className={classes}>
+      {animated && inView && (
         <>
           <span
             aria-hidden
